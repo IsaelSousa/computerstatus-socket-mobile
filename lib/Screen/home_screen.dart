@@ -16,6 +16,9 @@ class HomePageState extends State<HomePage> {
   double cpusage = 0;
   double freememory = 0;
   double totalmemory = 0;
+  int gputemperature = 0;
+  int gputilization = 0;
+  int gputotalmem = 0;
   List<String> hourAndMinute = ['00', '00', '00'];
 
   @override
@@ -59,9 +62,36 @@ class HomePageState extends State<HomePage> {
 
     socket.on('uptimehour', (data) {
       setState(() {
-        hourAndMinute[0] = (data / 60 / 60 % 60).toString().substring(0, 2).padLeft(2, '0');
-        hourAndMinute[1] = (data / 60 % 60).toString().substring(0, 2).padLeft(2, '0');
-        hourAndMinute[2] = (data % 60).toString().padLeft(2, '0');
+        hourAndMinute[0] = (data / 60 / 60 % 60)
+            .toString()
+            .substring(0, 2)
+            .replaceAll('.', '')
+            .padLeft(2, '0');
+        hourAndMinute[1] = (data / 60 % 60)
+            .toString()
+            .substring(0, 2)
+            .replaceAll('.', '')
+            .padLeft(2, '0');
+        hourAndMinute[2] =
+            (data % 60).toString().replaceAll('.', '').padLeft(2, '0');
+      });
+    });
+
+    socket.on('gputemperature', (data) {
+      setState(() {
+        gputemperature = data;
+      });
+    });
+
+    socket.on('gputilization', (data) {
+      setState(() {
+        gputilization = data;
+      });
+    });
+
+    socket.on('gputotalmem', (data) {
+      setState(() {
+        gputotalmem = data;
       });
     });
 
@@ -72,6 +102,8 @@ class HomePageState extends State<HomePage> {
         freememory = 0;
         totalmemory = 0;
         hourAndMinute = ['00', '00', '00'];
+        gputemperature = 0;
+        gputilization = 0;
       });
     });
   }
@@ -95,18 +127,52 @@ class HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     radius: 12,
                     backgroundColor:
                         isConnect == true ? Colors.green : Colors.red,
-                  )
+                  ),
                 ],
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text('Uptime Hours',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900))
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              hourAndMinute.isNotEmpty
+                                  ? '${hourAndMinute[0]}:${hourAndMinute[1]}:${hourAndMinute[2]}'
+                                  : '',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ))
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
             Padding(
-              padding: const EdgeInsets.only(top: 25),
+              padding: const EdgeInsets.only(top: 15),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -117,10 +183,10 @@ class HomePageState extends State<HomePage> {
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w900,
-                              fontSize: 18)),
+                              fontSize: 14)),
                       CircularPercentIndicator(
                         lineWidth: 10,
-                        radius: 30,
+                        radius: 35,
                         percent: double.parse(
                             '0.${cpusage.toString().substring(0, 2).replaceAll('.', '').padLeft(2, '0')}'),
                         center: Text(
@@ -137,11 +203,11 @@ class HomePageState extends State<HomePage> {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
-                            fontSize: 18,
+                            fontSize: 14,
                           )),
                       CircularPercentIndicator(
                         lineWidth: 10,
-                        radius: 30,
+                        radius: 35,
                         percent: double.parse(
                             '0.${freememory.toString().substring(0, 2).replaceAll('.', '').padLeft(2, '0')}'),
                         center: Text(
@@ -159,11 +225,11 @@ class HomePageState extends State<HomePage> {
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
-                            fontSize: 18),
+                            fontSize: 14),
                       ),
                       CircularPercentIndicator(
                         lineWidth: 10,
-                        radius: 30,
+                        radius: 35,
                         animation: true,
                         percent: double.parse(
                             '0.${totalmemory.toString().substring(0, 2).replaceAll('.', '').padLeft(2, '0')}'),
@@ -179,28 +245,68 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Column(
+              padding: const EdgeInsets.only(top: 15),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Text('Uptime Hours', style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900
-                    ))],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
                     children: [
-                      Text(hourAndMinute.isNotEmpty
-                          ? '${hourAndMinute[0]}:${hourAndMinute[1]}:${hourAndMinute[2]}'
-                          : '', style: const TextStyle(
+                      const Text('GPU Temp',
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
-                          ))
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          )),
+                      CircularPercentIndicator(
+                        lineWidth: 10,
+                        radius: 35,
+                        percent: double.parse('0.${gputemperature.toString()}'),
+                        center: Text("${gputemperature.toString()}ºC",
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500)),
+                      )
                     ],
-                  )
+                  ),
+                  Column(
+                    children: [
+                      const Text('GPU Usage',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          )),
+                      CircularPercentIndicator(
+                        lineWidth: 10,
+                        radius: 35,
+                        percent: double.parse('0.${gputilization.toString().padLeft(2, '0')}'),
+                        center: Text("${gputilization.toString()}%",
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500)),
+                      )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const Text('GPU Total Mem',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          )),
+                      CircularPercentIndicator(
+                        lineWidth: 10,
+                        radius: 35,
+                        percent: double.parse('0.${gputotalmem.toString().padLeft(2, '0')}'),
+                        center: Text("${gputotalmem.toString()} GB",
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500)),
+                      )
+                    ],
+                  ),
                 ],
               ),
             )
