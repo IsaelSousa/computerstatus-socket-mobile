@@ -1,3 +1,4 @@
+import 'package:computerstatussocketmobile/Screen/initial_screen.dart';
 import 'package:flutter/material.dart';
 import 'Screen/home_screen.dart';
 
@@ -10,14 +11,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ComputerStatus Socket Mobile',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/initialscreen',
       routes: {
-        '/': (context) => const HomePage(),
+        '/initialscreen': (context) => const InitialScreen(),
+        '/homescreen': (context) => const HomePage(),
       },
     );
   }

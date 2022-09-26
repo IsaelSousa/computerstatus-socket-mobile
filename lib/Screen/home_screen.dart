@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:percent_indicator/percent_indicator.dart';
@@ -20,15 +21,22 @@ class HomePageState extends State<HomePage> {
   int gputilization = 0;
   int gputotalmem = 0;
   List<String> hourAndMinute = ['00', '00', '00'];
-
+  
   @override
   void initState() {
     super.initState();
     initSocket();
   }
 
+  getData() async {
+
+  }
+
   Future<void> initSocket() async {
-    socket = IO.io('http://192.168.0.106:8080',
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    socket = IO.io(prefs.getString('ip'),
         IO.OptionBuilder().setTransports(['websocket']).build());
 
     socket.connect();
